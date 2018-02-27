@@ -1,7 +1,7 @@
-all: master producer consumer
+all: oss
 
-master: master.c
-	gcc -g -o master master.c makeargv.c
+oss: oss.c
+	gcc -o oss oss.c
 
 producer: producer.c
 	gcc -o producer producer.c
