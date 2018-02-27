@@ -1,10 +1,7 @@
-all: oss
+all: oss userprocess
 
 oss: oss.c
 	gcc -o oss oss.c
 
-producer: producer.c
-	gcc -o producer producer.c
-
-consumer: consumer.c
-	gcc -o consumer consumer.c
+user: user.c
+	gcc -o user user.c
