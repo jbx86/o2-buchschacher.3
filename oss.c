@@ -7,6 +7,13 @@
 #define SHKEY 12345
 #define PERM (S_IRUSR | S_IWUSR)
 
+typedef struct {
+	int sec;
+	int nano;
+} clock;
+
+static clock *sim_clock;
+
 int main(int argc, char *argv[]) {
 
 	int opt;
@@ -57,57 +64,43 @@ int main(int argc, char *argv[]) {
 
 	// Initialize shared memory clock to zero
 	int shmid;
-	int *clock_s;
-	int *clock_ns;
-	key_t key;
+	key_t key = 12345;
 
 	// Make a key
-	if ((key = ftok(".", 'x')) == -1) {
+/*	if ((key = ftok(".", 'x')) == -1) {
 		fprintf(stderr, "Failed to derive key from filepath\n");
 		return 1; 
 	}
-
+*/
 
 	// Create memory segment
-	if ((shmid = shmget(key, sizeof(int), IPC_CREAT | 0666)) == -1) {
+	if ((shmid = shmget(key, sizeof(clock), IPC_CREAT | 0666)) == -1) {
 		fprintf(stderr, "Failed to create shared memory segment\n");
 		return 1;
 	}
 
 	// Attach to memory segment
-	clock_s = (int *) shmat(shmid, NULL, 0);
-	*clock_s = 0;
+	sim_clock = (clock *) shmat(shmid, NULL, 0);
+	sim_clock->sec = 1;
+	sim_clock->nano = 2;
 
-	// Create memory segment
-	if ((shmid = shmget(key, sizeof(int), IPC_CREAT | 0666)) == -1) {
-		fprintf(stderr, "Failed to create shared memory segment\n");
-		return 1;
-	}
-	// Attach to memory segment
-	clock_ns = (int *) shmat(shmid, NULL, 0);
-	*clock_ns = 0;
-
-
-	printf("Parent clock: %d:%d\n", *clock_s, *clock_ns);
-
-
+	printf("Parent clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
 
 	int pid;
 	pid = fork();
 	if (pid == 0) {
-		printf("Child clock: %d:%d\n", *clock_s, *clock_ns);
-		*clock_s = 6;
-		*clock_ns = 7;
-		printf("Child clock: %d:%d\n", *clock_s, *clock_ns);
+		printf("Child clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
+		sim_clock->sec = 6;
+		sim_clock->nano = 7;
+		printf("Child clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
 	}
 	else {
 		wait();
-		printf("Parent clock: %d:%d\n", *clock_s, *clock_ns);
+		printf("Parent clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
 
 	}	
 
-	shmdt(clock_s);
-	shmdt(clock_ns);
+	shmdt(sim_clock);
 	shmctl(shmid, IPC_RMID, NULL);
 
 	//fprintf(stderr, "shared memory id:%d\n", shmid);
