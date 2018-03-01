@@ -86,6 +86,7 @@ int main(int argc, char *argv[]) {
 
 	printf("Parent clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
 
+	// Fork off appropriate number of child processes
 	int pid;
 	pid = fork();
 	if (pid == 0) {
