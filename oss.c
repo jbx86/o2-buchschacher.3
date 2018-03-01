@@ -1,6 +1,10 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
 
+#define PERM (S_IRUSR | S_IWUSR)
 
 int main(int argc, char *argv[]) {
 
@@ -39,22 +43,57 @@ int main(int argc, char *argv[]) {
 					return 1;
 				}
 				break;
-		/*	case '?':
-				if (optopt == 'c')
-					printf("Option %c requires an argument\n", optopt
-				break;
-		*/
 		}
 	}
-	printf("Arguments: h=%d, x=%d, filename=%s, z=%d\n", hflag, x, filename, z);
+
+	//printf("Arguments: h=%d, x=%d, filename=%s, z=%d\n", hflag, x, filename, z); // debug message
 
 	// Open log file
 	if ((fp = fopen(filename, "w")) == NULL) {
 		fprintf(stderr, "Could not open log file\n");
-		return 0;
+		return 1;
 	}
 
 	// Initialize shared memory clock to zero
+	int shmid;
+	int *clock_s;
+	int *clock_ns;
+	key_t key;
+
+	// Make a key
+	if ((key = ftok(".", 'x')) == -1) {
+		fprintf(stderr, "Failed to derive key from filepath\n");
+		return 1; 
+	}
+	// Create memory segment
+	if ((shmid = shmget(key, sizeof(int), IPC_CREAT | 0666)) == -1) {
+		fprintf(stderr, "Failed to create shared memory segment\n");
+		return 1;
+	}
+	// Attach to memory segment
+	clock_s = (int *) shmat(shmid, NULL, 0);
+	*clock_s = 0;
+	printf("clock s:%d\n", *clock_s);
+
+	int pid;
+	pid = fork();
+	if (pid == 0) {
+		printf("clock s:%d\n", *clock_s);
+		*clock_s = 6;
+		printf("clock s:%d\n", *clock_s);
+
+	}
+	else {
+		wait();
+		printf("clock s:%d\n", *clock_s);
+	}	
+
+	clock_s = shmat(shmid, NULL, 0);
+
+	shmdt(clock_s);
+	shmctl(shmid, IPC_RMID, NULL);
+
+	//fprintf(stderr, "shared memory id:%d\n", shmid);
 	// Fork off the appropriate number of child processes.
 	// wait for child processes to send a message.
 	// When sent a message, output the contents of that message to a file

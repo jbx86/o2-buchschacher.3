@@ -1,4 +1,4 @@
-all: oss userprocess
+all: oss user
 
 oss: oss.c
 	gcc -o oss oss.c
