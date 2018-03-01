@@ -4,6 +4,7 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 
+#define SHKEY 12345
 #define PERM (S_IRUSR | S_IWUSR)
 
 int main(int argc, char *argv[]) {
@@ -65,32 +66,48 @@ int main(int argc, char *argv[]) {
 		fprintf(stderr, "Failed to derive key from filepath\n");
 		return 1; 
 	}
+
+
+	// Create memory segment
+	if ((shmid = shmget(key, sizeof(int), IPC_CREAT | 0666)) == -1) {
+		fprintf(stderr, "Failed to create shared memory segment\n");
+		return 1;
+	}
+
+	// Attach to memory segment
+	clock_s = (int *) shmat(shmid, NULL, 0);
+	*clock_s = 0;
+
 	// Create memory segment
 	if ((shmid = shmget(key, sizeof(int), IPC_CREAT | 0666)) == -1) {
 		fprintf(stderr, "Failed to create shared memory segment\n");
 		return 1;
 	}
 	// Attach to memory segment
-	clock_s = (int *) shmat(shmid, NULL, 0);
-	*clock_s = 0;
-	printf("clock s:%d\n", *clock_s);
+	clock_ns = (int *) shmat(shmid, NULL, 0);
+	*clock_ns = 0;
+
+
+	printf("Parent clock: %d:%d\n", *clock_s, *clock_ns);
+
+
 
 	int pid;
 	pid = fork();
 	if (pid == 0) {
-		printf("clock s:%d\n", *clock_s);
+		printf("Child clock: %d:%d\n", *clock_s, *clock_ns);
 		*clock_s = 6;
-		printf("clock s:%d\n", *clock_s);
-
+		*clock_ns = 7;
+		printf("Child clock: %d:%d\n", *clock_s, *clock_ns);
 	}
 	else {
 		wait();
-		printf("clock s:%d\n", *clock_s);
+		printf("Parent clock: %d:%d\n", *clock_s, *clock_ns);
+
 	}	
 
-	clock_s = shmat(shmid, NULL, 0);
-
 	shmdt(clock_s);
+	shmdt(clock_ns);
 	shmctl(shmid, IPC_RMID, NULL);
 
 	//fprintf(stderr, "shared memory id:%d\n", shmid);
