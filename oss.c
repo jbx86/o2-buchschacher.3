@@ -4,6 +4,7 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 
+#define DEBUG
 #define SHKEY 12345
 #define PERM (S_IRUSR | S_IWUSR)
 
@@ -23,6 +24,9 @@ int main(int argc, char *argv[]) {
 	int z = 20;	// Time in seconds when the master will terminat
 
 	FILE *fp;
+
+	int i;
+	int pid;
 
 	//Parse command line options
 	while ((opt = getopt(argc, argv, "hs:l:t:")) != -1) {
@@ -84,22 +88,20 @@ int main(int argc, char *argv[]) {
 	sim_clock->sec = 1;
 	sim_clock->nano = 2;
 
-	printf("Parent clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
+	printf("Parent clock: %d:%d at %d\n", sim_clock->sec, sim_clock->nano, sim_clock);
 
 	// Fork off appropriate number of child processes
-	int pid;
-	pid = fork();
-	if (pid == 0) {
-		printf("Child clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
-		sim_clock->sec = 6;
-		sim_clock->nano = 7;
-		printf("Child clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
+	for (i = 0; i < x; i++) {
+		pid = fork();
+		if (pid == 0) {
+			//printf("Child %d at %d:%d\n", getpid(), sim_clock->sec, sim_clock->nano);
+			execlp("./user", "user", sim_clock);
+			return 1;
+		}
+		else {
+			printf("Parent %d spawned process %d\n", getpid(), pid);
+		}
 	}
-	else {
-		wait();
-		printf("Parent clock: %d:%d\n", sim_clock->sec, sim_clock->nano);
-
-	}	
 
 	shmdt(sim_clock);
 	shmctl(shmid, IPC_RMID, NULL);

@@ -1,5 +1,23 @@
+#include <stdio.h>
+#include <unistd.h>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <sys/stat.h>
+
+typedef struct {
+        int sec;
+        int nano;
+} clock;
 
 int main(int argc, char *argv[]) {
+
+	//clock *sim_clock = atoi(argv[1]);
+
+	do {
+		printf("Child %d recieved shmid %d from %d\n", getpid(), argv[1], getppid());
+		return 0;
+	} while ( 1 );
+
 	// Read OSS clock and add an increment of time to it.
 	//Start by reading our simulated system clock.
 	//Generate a random duration number from 1 to some maximum number of nanosecond constant (A reasonable value might be something like 1000000).
