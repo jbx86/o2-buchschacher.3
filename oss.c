@@ -3,6 +3,7 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define DEBUG
 #define SHKEY 12345
@@ -11,9 +12,9 @@
 typedef struct {
 	int sec;
 	int nano;
-} clock;
+} sclock;
 
-static clock *sim_clock;
+static sclock *sim_clock;
 
 int main(int argc, char *argv[]) {
 
@@ -27,6 +28,8 @@ int main(int argc, char *argv[]) {
 
 	int i;
 	int pid;
+
+	time_t tstart = time(NULL);
 
 	//Parse command line options
 	while ((opt = getopt(argc, argv, "hs:l:t:")) != -1) {
@@ -78,13 +81,13 @@ int main(int argc, char *argv[]) {
 */
 
 	// Create memory segment
-	if ((shmid = shmget(key, sizeof(clock), IPC_CREAT | 0666)) == -1) {
+	if ((shmid = shmget(key, sizeof(sclock), IPC_CREAT | 0666)) == -1) {
 		fprintf(stderr, "Failed to create shared memory segment\n");
 		return 1;
 	}
 
 	// Attach to memory segment
-	sim_clock = (clock *) shmat(shmid, NULL, 0);
+	sim_clock = (sclock *) shmat(shmid, NULL, 0);
 	sim_clock->sec = 1;
 	sim_clock->nano = 2;
 
@@ -101,6 +104,10 @@ int main(int argc, char *argv[]) {
 		else {
 			printf("Parent %d spawned process %d\n", getpid(), pid);
 		}
+	}
+
+	while ((difftime(time(NULL), tstart) < z) && (sim_clock->sec < 2)) {
+		printf("Clock time passed:%2d, Simulation time passed:%2d:%2d\n", (int)difftime(time(NULL), tstart), sim_clock->sec, sim_clock->nano);
 	}
 
 	shmdt(sim_clock);
