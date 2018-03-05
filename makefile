@@ -1,4 +1,4 @@
-all: oss user
+all: oss user simclock.h
 
 oss: oss.c
 	gcc -o oss oss.c

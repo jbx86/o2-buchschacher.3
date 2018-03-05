@@ -4,26 +4,16 @@
 #include <sys/shm.h>
 #include <sys/stat.h>
 #include <time.h>
-
-#define DEBUG
-#define SHKEY 12345
-#define PERM (S_IRUSR | S_IWUSR)
-
-typedef struct {
-	int sec;
-	int nano;
-} sclock;
-
-static sclock *sim_clock;
+#include "simclock.h"
 
 int main(int argc, char *argv[]) {
 
+	// Vars for flag parsing
 	int opt;
 	int hflag = 0;	// -h flag
 	int x = 5;	// Maximum number of slave processes
 	char *filename = NULL;	// Log file to be used
 	int z = 20;	// Time in seconds when the master will terminat
-
 	FILE *fp;
 
 	int i;
@@ -61,8 +51,6 @@ int main(int argc, char *argv[]) {
 		}
 	}
 
-	//printf("Arguments: h=%d, x=%d, filename=%s, z=%d\n", hflag, x, filename, z); // debug message
-
 	// Open log file
 	if ((fp = fopen(filename, "w")) == NULL) {
 		fprintf(stderr, "Could not open log file\n");
@@ -71,34 +59,27 @@ int main(int argc, char *argv[]) {
 
 	// Initialize shared memory clock to zero
 	int shmid;
-	key_t key = 12345;
-
-	// Make a key
-/*	if ((key = ftok(".", 'x')) == -1) {
-		fprintf(stderr, "Failed to derive key from filepath\n");
-		return 1; 
-	}
-*/
+	simclock * sim_clock;
 
 	// Create memory segment
-	if ((shmid = shmget(key, sizeof(sclock), IPC_CREAT | 0666)) == -1) {
+	if ((shmid = shmget(KEY, sizeof(simclock), IPC_CREAT | 0666)) == -1) {
 		fprintf(stderr, "Failed to create shared memory segment\n");
 		return 1;
 	}
 
 	// Attach to memory segment
-	sim_clock = (sclock *) shmat(shmid, NULL, 0);
-	sim_clock->sec = 1;
-	sim_clock->nano = 2;
+	sim_clock = (simclock *) shmat(shmid, NULL, 0);
+	sim_clock->sec = 0;
+	sim_clock->nano = 0;
 
-	printf("Parent clock: %d:%d at %d\n", sim_clock->sec, sim_clock->nano, sim_clock);
+	printf("simulation clock: %d:%d at %p\n", sim_clock->sec, sim_clock->nano, sim_clock);
 
 	// Fork off appropriate number of child processes
 	for (i = 0; i < x; i++) {
 		pid = fork();
 		if (pid == 0) {
 			//printf("Child %d at %d:%d\n", getpid(), sim_clock->sec, sim_clock->nano);
-			execlp("./user", "user", sim_clock);
+			execlp("./user", "user", sim_clock, NULL);
 			return 1;
 		}
 		else {
@@ -107,10 +88,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	while ((difftime(time(NULL), tstart) < z) && (sim_clock->sec < 2)) {
-		printf("Clock time passed:%2d, Simulation time passed:%2d:%2d\n", (int)difftime(time(NULL), tstart), sim_clock->sec, sim_clock->nano);
+		//printf("Clock time passed:%2d, Simulation time passed:%2d:%2d\n", (int)difftime(time(NULL), tstart), sim_clock->sec, sim_clock->nano);
 	}
 
-	shmdt(sim_clock);
+	//shmdt(sim_clock);
 	shmctl(shmid, IPC_RMID, NULL);
 
 	//fprintf(stderr, "shared memory id:%d\n", shmid);

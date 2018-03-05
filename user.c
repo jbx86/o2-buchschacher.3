@@ -3,20 +3,27 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
-
-typedef struct {
-        int sec;
-        int nano;
-} clock;
+#include "simclock.h"
 
 int main(int argc, char *argv[]) {
 
-	//clock *sim_clock = atoi(argv[1]);
+	//clock *sim_clock = atoi(argv[1]);	
+	struct simclock * sim_clock;
+	int shmid;
 
-	do {
-		printf("Child %d recieved shmid %d from %d\n", getpid(), argv[1], getppid());
-		return 0;
-	} while ( 1 );
+
+// Create memory segment
+	if ((shmid = shmget(KEY, sizeof(struct simclock), IPC_CREAT | 0666)) == -1) {
+		fprintf(stderr, "Failed to create shared memory segment\n");
+		return 1;
+	}
+// Attach to memory segment
+	sim_clock = (struct simclock *) shmat(shmid, NULL, 0);
+
+	printf("Child %d recieved value %p\n", getpid(), sim_clock);
+
+
+
 
 	// Read OSS clock and add an increment of time to it.
 	//Start by reading our simulated system clock.
