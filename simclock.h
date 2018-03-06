@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <unistd.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
@@ -6,7 +7,7 @@
 #include <time.h>
 
 
-#define KEY 12345
+#define KEY 5678
 
 typedef struct {
 	int sec, nano;

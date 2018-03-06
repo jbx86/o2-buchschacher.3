@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
@@ -10,11 +11,16 @@ int main(int argc, char *argv[]) {
 
 	// Vars for flag parsing
 	int opt;
-	int hflag = 0;	// -h flag
-	int x = 5;	// Maximum number of slave processes
+	int hflag = 0;		// -h flag
+	int x = 5;		// Maximum number of slave processes
 	char *filename = NULL;	// Log file to be used
-	int z = 20;	// Time in seconds when the master will terminat
-	FILE *fp;
+	int z = 20;		// Time in seconds when the master will terminat
+	FILE *fp;		// File pointer
+
+	// Vars for shared memory
+	int shmid;		//shared memory ID
+	key_t key = 5678;	//shared memory key
+	simclock *myclock;	//pointer to shared clock
 
 	int i;
 	int pid;
@@ -53,27 +59,38 @@ int main(int argc, char *argv[]) {
 
 	// Open log file
 	if ((fp = fopen(filename, "w")) == NULL) {
-		fprintf(stderr, "Could not open log file\n");
+		fprintf(stderr, "Could not open log file or no log file was provided\n");
 		return 1;
 	}
 
-	// Initialize shared memory clock to zero
-	int shmid;
-	simclock * sim_clock;
-
-	// Create memory segment
-	if ((shmid = shmget(KEY, sizeof(simclock), IPC_CREAT | 0666)) == -1) {
+	/* Create memory segment */
+	if ((shmid = shmget(key, sizeof(simclock), IPC_CREAT | 0666)) < 0) {
 		fprintf(stderr, "Failed to create shared memory segment\n");
 		return 1;
 	}
 
-	// Attach to memory segment
-	sim_clock = (simclock *) shmat(shmid, NULL, 0);
-	sim_clock->sec = 0;
-	sim_clock->nano = 0;
+	/* Attach to memory segment */
+	if ((myclock = shmat(shmid, NULL, 0)) == (simclock *) -1) {
+		fprintf(stderr, "Shmat error");
+		return 1;
+	}
+	
+	// shmctl(shmid, IPC_RMID, NULL);
+	myclock->sec = 0;
+	myclock->nano = 0;
+	printf("Parent: %d:%d at %p\n", myclock->sec, myclock->nano, myclock);
 
-	printf("simulation clock: %d:%d at %p\n", sim_clock->sec, sim_clock->nano, sim_clock);
+	pid = fork();
+	if (pid == 0) {
+		execlp("./user", "user", NULL);
+	}
+	else {
+		printf("Parent %d spawned child %d\n", getpid(), pid);
+	}
 
+
+	exit(0);
+/*
 	// Fork off appropriate number of child processes
 	for (i = 0; i < x; i++) {
 		pid = fork();
@@ -101,7 +118,10 @@ int main(int argc, char *argv[]) {
 	// Go into the critical section to add 100 to the clock
 	// Fork off another child.
 	// After 2 seconds have passed in simulated system, terminate all children and master.
+
 	//
+*/
 	fclose(fp);
-	return 0;
+	exit(0);
+
 }

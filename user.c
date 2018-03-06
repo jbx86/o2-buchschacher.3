@@ -6,23 +6,27 @@
 #include "simclock.h"
 
 int main(int argc, char *argv[]) {
-
-	//clock *sim_clock = atoi(argv[1]);	
-	struct simclock * sim_clock;
 	int shmid;
+	key_t key = 5678;
+	simclock *myclock;
 
 
-// Create memory segment
-	if ((shmid = shmget(KEY, sizeof(struct simclock), IPC_CREAT | 0666)) == -1) {
-		fprintf(stderr, "Failed to create shared memory segment\n");
-		return 1;
-	}
-// Attach to memory segment
-	sim_clock = (struct simclock *) shmat(shmid, NULL, 0);
+	//sim_clock->sec = 0;
+	//sim_clock->nano = 0;
 
-	printf("Child %d recieved value %p\n", getpid(), sim_clock);
+	/* Locate the segment */
+        if ((shmid = shmget(key, sizeof(simclock), 0666)) < 0) {
+                perror("shmget");
+                exit(1);
+        }
 
+        /* Attach segment to data space */
+        if ((myclock = shmat(shmid, NULL, 0)) == (simclock *) -1) {
+                perror("shmat");
+                exit(1);
+        }
 
+        printf("Client: %d:%d\n", myclock->sec++, myclock->nano++);
 
 
 	// Read OSS clock and add an increment of time to it.
