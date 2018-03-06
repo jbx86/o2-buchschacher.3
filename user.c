@@ -1,11 +1,17 @@
 #include "simclock.h"
 
 int main(int argc, char *argv[]) {
+	// shm vars
 	int shmid;
 	key_t key = KEY;
 	simclock *myclock;
+	// msq vars
+	int msqid;
+	message_buf rbuf;
+	// random vars
 	srand(time(NULL));
 	int sim_durration = (rand() % 1000000) + 1;
+
 
 	/* Locate the segment */
         if ((shmid = shmget(key, sizeof(simclock), 0666)) < 0) {
@@ -25,6 +31,20 @@ int main(int argc, char *argv[]) {
                 myclock->nano = myclock->nano % 1000000000;
                 myclock->sec++;
         }
+
+	
+	/* msq code */
+	if ((msqid = msgget(key, 0666)) < 0) {
+		fprintf(stderr, "Failed to find message queue\n");
+		exit(1);
+	}
+	if (msgrcv(msqid, &rbuf, MSGSZ, 1, 0) < 0) {
+		perror("User: msgrcv");
+		exit(1);
+	}
+
+	printf("%s\n", rbuf.mtext);
+	exit(0);
 
 
         //printf("Client: %d:%d\n", myclock->sec, myclock->nano);

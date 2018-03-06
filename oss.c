@@ -15,6 +15,10 @@ int main(int argc, char *argv[]) {
 	key_t key = KEY;	//shared memory key
 	simclock *myclock;	//pointer to shared clock
 
+	// Message queue vars
+	int msqid;
+	message_buf sbuf;
+
 	int i;
 	int user_pid;
 	int user_limit = 0;
@@ -74,6 +78,31 @@ int main(int argc, char *argv[]) {
 	// Initialize clock at 0.0s
 	myclock->sec = 0;
 	myclock->nano = 0;
+
+
+	/* Create message queue */
+	if ((msqid = msgget(key, IPC_CREAT | 0666)) < 0) {
+		fprintf(stderr, "Failed to create message queue\n");
+		return 1;
+	}
+
+
+
+	/* message sending code */
+	//message_buf sbuf;
+	size_t buf_length;
+
+	sbuf.mtype = 1;
+	strcpy(sbuf.mtext, "SPAAAAAACE");
+	buf_length = strlen(sbuf.mtext) + 1;
+
+	if (msgsnd(msqid, &sbuf, buf_length, IPC_NOWAIT) < 0) {
+		fprintf(stderr, "Failed to send message\n");
+	}
+	else {
+		fprintf(stderr, "Message: \"%s\" sent\n", sbuf.mtext);
+	}
+
 
 	// Continue until 2 seconds have passed in simulated system, 100 processes have been generated, or OSS has be running for maximum time allotted.
 	while ((myclock->sec < 2) && (user_total < 100) && (difftime(time(NULL), tstart) < z)) {
