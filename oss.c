@@ -1,10 +1,3 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/stat.h>
-#include <time.h>
 #include "simclock.h"
 
 int main(int argc, char *argv[]) {
@@ -19,11 +12,14 @@ int main(int argc, char *argv[]) {
 
 	// Vars for shared memory
 	int shmid;		//shared memory ID
-	key_t key = 5678;	//shared memory key
+	key_t key = KEY;	//shared memory key
 	simclock *myclock;	//pointer to shared clock
 
 	int i;
-	int pid;
+	int user_pid;
+	int user_limit = 0;
+	int user_count = 0;
+	int user_total = 0;
 
 	time_t tstart = time(NULL);
 
@@ -61,7 +57,7 @@ int main(int argc, char *argv[]) {
 	if ((fp = fopen(filename, "w")) == NULL) {
 		fprintf(stderr, "Could not open log file or no log file was provided\n");
 		return 1;
-	}
+	}	
 
 	/* Create memory segment */
 	if ((shmid = shmget(key, sizeof(simclock), IPC_CREAT | 0666)) < 0) {
@@ -75,53 +71,36 @@ int main(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	// shmctl(shmid, IPC_RMID, NULL);
+	// Initialize clock at 0.0s
 	myclock->sec = 0;
 	myclock->nano = 0;
-	printf("Parent: %d:%d at %p\n", myclock->sec, myclock->nano, myclock);
 
-	pid = fork();
-	if (pid == 0) {
-		execlp("./user", "user", NULL);
-	}
-	else {
-		printf("Parent %d spawned child %d\n", getpid(), pid);
-	}
+	// Continue until 2 seconds have passed in simulated system, 100 processes have been generated, or OSS has be running for maximum time allotted.
+	while ((myclock->sec < 2) && (user_total < 100) && (difftime(time(NULL), tstart) < z)) {
+		// Fork off the appropriate number of child processes
+		if (user_count == x) {
+			user_pid = wait(NULL);
+			fprintf(fp, "Master: Child pid %3d is terminating at my time %2d.%2d\n", user_pid, myclock->sec, myclock->nano);
+			user_count--;
+		}
 
+		user_count++;
+		user_total++;
 
-	exit(0);
-/*
-	// Fork off appropriate number of child processes
-	for (i = 0; i < x; i++) {
-		pid = fork();
-		if (pid == 0) {
-			//printf("Child %d at %d:%d\n", getpid(), sim_clock->sec, sim_clock->nano);
-			execlp("./user", "user", sim_clock, NULL);
-			return 1;
+		user_pid = fork();
+		if (user_pid == 0) {
+			execlp("./user", "user", NULL);
 		}
 		else {
-			printf("Parent %d spawned process %d\n", getpid(), pid);
+			fprintf(fp, "%3d Master: Creating new child pid %3d at my time %2d.%2d\n", user_total, user_pid, myclock->sec, myclock->nano);
 		}
 	}
 
-	while ((difftime(time(NULL), tstart) < z) && (sim_clock->sec < 2)) {
-		//printf("Clock time passed:%2d, Simulation time passed:%2d:%2d\n", (int)difftime(time(NULL), tstart), sim_clock->sec, sim_clock->nano);
+	while (wait(NULL) != -1) {
 	}
 
-	//shmdt(sim_clock);
+	shmdt(myclock);
 	shmctl(shmid, IPC_RMID, NULL);
 
-	//fprintf(stderr, "shared memory id:%d\n", shmid);
-	// Fork off the appropriate number of child processes.
-	// wait for child processes to send a message.
-	// When sent a message, output the contents of that message to a file
-	// Go into the critical section to add 100 to the clock
-	// Fork off another child.
-	// After 2 seconds have passed in simulated system, terminate all children and master.
-
-	//
-*/
-	fclose(fp);
 	exit(0);
-
 }

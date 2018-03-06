@@ -1,18 +1,11 @@
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/ipc.h>
-#include <sys/shm.h>
-#include <sys/stat.h>
 #include "simclock.h"
 
 int main(int argc, char *argv[]) {
 	int shmid;
-	key_t key = 5678;
+	key_t key = KEY;
 	simclock *myclock;
-
-
-	//sim_clock->sec = 0;
-	//sim_clock->nano = 0;
+	srand(time(NULL));
+	int sim_durration = (rand() % 1000000) + 1;
 
 	/* Locate the segment */
         if ((shmid = shmget(key, sizeof(simclock), 0666)) < 0) {
@@ -26,7 +19,15 @@ int main(int argc, char *argv[]) {
                 exit(1);
         }
 
-        printf("Client: %d:%d\n", myclock->sec++, myclock->nano++);
+	// Read OSS clock and add an increment of time to it
+        myclock->nano = myclock->nano + sim_durration;
+        if (myclock->nano > 1000000000) {
+                myclock->nano = myclock->nano % 1000000000;
+                myclock->sec++;
+        }
+
+
+        //printf("Client: %d:%d\n", myclock->sec, myclock->nano);
 
 
 	// Read OSS clock and add an increment of time to it.

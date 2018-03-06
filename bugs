@@ -1,0 +1,195 @@
+  1 Master: Creating new child pid 20239 at my time  0. 0
+  2 Master: Creating new child pid 20240 at my time  0. 0
+  3 Master: Creating new child pid 20241 at my time  0. 0
+  4 Master: Creating new child pid 20242 at my time  0. 0
+  5 Master: Creating new child pid 20243 at my time  0. 0
+Master: Child pid 20239 is terminating at my time  0.1429020
+  6 Master: Creating new child pid 20244 at my time  0.1429020
+Master: Child pid 20240 is terminating at my time  0.1429020
+  7 Master: Creating new child pid 20245 at my time  0.1786275
+Master: Child pid 20241 is terminating at my time  0.1786275
+  8 Master: Creating new child pid 20246 at my time  0.1786275
+Master: Child pid 20242 is terminating at my time  0.1786275
+  9 Master: Creating new child pid 20247 at my time  0.1786275
+Master: Child pid 20243 is terminating at my time  0.1786275
+ 10 Master: Creating new child pid 20248 at my time  0.1786275
+Master: Child pid 20244 is terminating at my time  0.2858040
+ 11 Master: Creating new child pid 20249 at my time  0.3215295
+Master: Child pid 20245 is terminating at my time  0.3215295
+ 12 Master: Creating new child pid 20250 at my time  0.3215295
+Master: Child pid 20246 is terminating at my time  0.3215295
+ 13 Master: Creating new child pid 20251 at my time  0.3572550
+Master: Child pid 20247 is terminating at my time  0.3572550
+ 14 Master: Creating new child pid 20252 at my time  0.3572550
+Master: Child pid 20248 is terminating at my time  0.3572550
+ 15 Master: Creating new child pid 20253 at my time  0.3572550
+Master: Child pid 20249 is terminating at my time  0.4644315
+ 16 Master: Creating new child pid 20254 at my time  0.4644315
+Master: Child pid 20250 is terminating at my time  0.4644315
+ 17 Master: Creating new child pid 20255 at my time  0.4644315
+Master: Child pid 20251 is terminating at my time  0.4644315
+ 18 Master: Creating new child pid 20256 at my time  0.4644315
+Master: Child pid 20252 is terminating at my time  0.5716080
+ 19 Master: Creating new child pid 20257 at my time  0.6073335
+Master: Child pid 20254 is terminating at my time  0.6073335
+ 20 Master: Creating new child pid 20258 at my time  0.6073335
+Master: Child pid 20255 is terminating at my time  0.6073335
+ 21 Master: Creating new child pid 20259 at my time  0.6073335
+Master: Child pid 20256 is terminating at my time  0.6073335
+ 22 Master: Creating new child pid 20260 at my time  0.6073335
+Master: Child pid 20257 is terminating at my time  0.7145100
+ 23 Master: Creating new child pid 20261 at my time  0.7145100
+Master: Child pid 20258 is terminating at my time  0.7502355
+ 24 Master: Creating new child pid 20262 at my time  0.7502355
+Master: Child pid 20259 is terminating at my time  0.7502355
+ 25 Master: Creating new child pid 20263 at my time  0.7502355
+Master: Child pid 20260 is terminating at my time  0.7502355
+ 26 Master: Creating new child pid 20264 at my time  0.7859610
+Master: Child pid 20253 is terminating at my time  0.7859610
+ 27 Master: Creating new child pid 20265 at my time  0.7859610
+Master: Child pid 20261 is terminating at my time  0.8931375
+ 28 Master: Creating new child pid 20266 at my time  0.8931375
+Master: Child pid 20262 is terminating at my time  0.9288630
+ 29 Master: Creating new child pid 20267 at my time  0.9288630
+Master: Child pid 20263 is terminating at my time  0.9288630
+ 30 Master: Creating new child pid 20268 at my time  0.9288630
+Master: Child pid 20264 is terminating at my time  0.9288630
+ 31 Master: Creating new child pid 20269 at my time  0.9288630
+Master: Child pid 20265 is terminating at my time  0.9645885
+ 32 Master: Creating new child pid 20270 at my time  0.9645885
+Master: Child pid 20267 is terminating at my time  0.10717650
+ 33 Master: Creating new child pid 20271 at my time  0.10717650
+Master: Child pid 20268 is terminating at my time  0.10717650
+ 34 Master: Creating new child pid 20272 at my time  0.10717650
+Master: Child pid 20270 is terminating at my time  0.11074905
+ 35 Master: Creating new child pid 20273 at my time  0.11432160
+Master: Child pid 20269 is terminating at my time  0.11432160
+ 36 Master: Creating new child pid 20274 at my time  0.11432160
+Master: Child pid 20266 is terminating at my time  0.11432160
+ 37 Master: Creating new child pid 20275 at my time  0.11432160
+Master: Child pid 20271 is terminating at my time  0.12503925
+ 38 Master: Creating new child pid 20276 at my time  0.12503925
+Master: Child pid 20272 is terminating at my time  0.12503925
+ 39 Master: Creating new child pid 20277 at my time  0.12503925
+Master: Child pid 20273 is terminating at my time  0.12503925
+ 40 Master: Creating new child pid 20278 at my time  0.13218435
+Master: Child pid 20274 is terminating at my time  0.13218435
+ 41 Master: Creating new child pid 20279 at my time  0.13218435
+Master: Child pid 20275 is terminating at my time  0.13218435
+ 42 Master: Creating new child pid 20280 at my time  0.13218435
+Master: Child pid 20276 is terminating at my time  0.14290200
+ 43 Master: Creating new child pid 20281 at my time  0.14290200
+Master: Child pid 20277 is terminating at my time  0.14290200
+ 44 Master: Creating new child pid 20282 at my time  0.14290200
+Master: Child pid 20278 is terminating at my time  0.14290200
+ 45 Master: Creating new child pid 20283 at my time  0.14647455
+Master: Child pid 20279 is terminating at my time  0.14647455
+ 46 Master: Creating new child pid 20284 at my time  0.15004710
+Master: Child pid 20280 is terminating at my time  0.15004710
+ 47 Master: Creating new child pid 20285 at my time  0.15004710
+Master: Child pid 20281 is terminating at my time  0.16076475
+ 48 Master: Creating new child pid 20286 at my time  0.16076475
+Master: Child pid 20284 is terminating at my time  0.16076475
+ 49 Master: Creating new child pid 20287 at my time  0.16076475
+Master: Child pid 20285 is terminating at my time  0.16076475
+ 50 Master: Creating new child pid 20288 at my time  0.16433730
+Master: Child pid 20282 is terminating at my time  0.16433730
+ 51 Master: Creating new child pid 20289 at my time  0.16433730
+Master: Child pid 20286 is terminating at my time  0.17505495
+ 52 Master: Creating new child pid 20290 at my time  0.17505495
+Master: Child pid 20287 is terminating at my time  0.17505495
+ 53 Master: Creating new child pid 20291 at my time  0.17862750
+Master: Child pid 20288 is terminating at my time  0.17862750
+ 54 Master: Creating new child pid 20292 at my time  0.17862750
+Master: Child pid 20289 is terminating at my time  0.18220005
+ 55 Master: Creating new child pid 20293 at my time  0.18220005
+Master: Child pid 20283 is terminating at my time  0.18220005
+ 56 Master: Creating new child pid 20294 at my time  0.18220005
+Master: Child pid 20290 is terminating at my time  0.19291770
+ 57 Master: Creating new child pid 20295 at my time  0.19291770
+Master: Child pid 20291 is terminating at my time  0.19291770
+ 58 Master: Creating new child pid 20296 at my time  0.19291770
+Master: Child pid 20293 is terminating at my time  0.19291770
+ 59 Master: Creating new child pid 20297 at my time  0.19649025
+Master: Child pid 20292 is terminating at my time  0.19649025
+ 60 Master: Creating new child pid 20298 at my time  0.20006280
+Master: Child pid 20294 is terminating at my time  0.20006280
+ 61 Master: Creating new child pid 20299 at my time  0.20006280
+Master: Child pid 20295 is terminating at my time  0.21078045
+ 62 Master: Creating new child pid 20300 at my time  0.21078045
+Master: Child pid 20298 is terminating at my time  0.21078045
+ 63 Master: Creating new child pid 20301 at my time  0.21435300
+Master: Child pid 20299 is terminating at my time  0.21435300
+ 64 Master: Creating new child pid 20302 at my time  0.21435300
+Master: Child pid 20296 is terminating at my time  0.21435300
+ 65 Master: Creating new child pid 20303 at my time  0.21435300
+Master: Child pid 20297 is terminating at my time  0.22864320
+ 66 Master: Creating new child pid 20304 at my time  0.22864320
+Master: Child pid 20300 is terminating at my time  0.22864320
+ 67 Master: Creating new child pid 20305 at my time  0.22864320
+Master: Child pid 20301 is terminating at my time  0.23221575
+ 68 Master: Creating new child pid 20306 at my time  0.23221575
+Master: Child pid 20302 is terminating at my time  0.23221575
+ 69 Master: Creating new child pid 20307 at my time  0.23221575
+Master: Child pid 20303 is terminating at my time  0.23221575
+ 70 Master: Creating new child pid 20308 at my time  0.23221575
+Master: Child pid 20304 is terminating at my time  0.24293340
+ 71 Master: Creating new child pid 20309 at my time  0.24650595
+Master: Child pid 20305 is terminating at my time  0.24650595
+ 72 Master: Creating new child pid 20310 at my time  0.24650595
+Master: Child pid 20306 is terminating at my time  0.24650595
+ 73 Master: Creating new child pid 20311 at my time  0.25007850
+Master: Child pid 20308 is terminating at my time  0.25007850
+ 74 Master: Creating new child pid 20312 at my time  0.25007850
+Master: Child pid 20307 is terminating at my time  0.25007850
+ 75 Master: Creating new child pid 20313 at my time  0.25007850
+Master: Child pid 20309 is terminating at my time  0.26079615
+ 76 Master: Creating new child pid 20314 at my time  0.26079615
+Master: Child pid 20310 is terminating at my time  0.26436870
+ 77 Master: Creating new child pid 20315 at my time  0.26436870
+Master: Child pid 20311 is terminating at my time  0.26436870
+ 78 Master: Creating new child pid 20316 at my time  0.26436870
+Master: Child pid 20313 is terminating at my time  0.26436870
+ 79 Master: Creating new child pid 20317 at my time  0.26436870
+Master: Child pid 20314 is terminating at my time  0.27151380
+ 80 Master: Creating new child pid 20318 at my time  0.27151380
+Master: Child pid 20315 is terminating at my time  0.27151380
+ 81 Master: Creating new child pid 20319 at my time  0.27508635
+Master: Child pid 20316 is terminating at my time  0.27508635
+ 82 Master: Creating new child pid 20320 at my time  0.27508635
+Master: Child pid 20317 is terminating at my time  0.28580400
+ 83 Master: Creating new child pid 20321 at my time  0.28580400
+Master: Child pid 20318 is terminating at my time  0.28580400
+ 84 Master: Creating new child pid 20322 at my time  0.28580400
+Master: Child pid 20320 is terminating at my time  0.28580400
+ 85 Master: Creating new child pid 20323 at my time  0.28937655
+Master: Child pid 20319 is terminating at my time  0.28937655
+ 86 Master: Creating new child pid 20324 at my time  0.28937655
+Master: Child pid 20321 is terminating at my time  0.30009420
+ 87 Master: Creating new child pid 20325 at my time  0.30009420
+Master: Child pid 20322 is terminating at my time  0.30009420
+ 88 Master: Creating new child pid 20326 at my time  0.30009420
+Master: Child pid 20324 is terminating at my time  0.30009420
+ 89 Master: Creating new child pid 20327 at my time  0.30366675
+Master: Child pid 20323 is terminating at my time  0.30366675
+ 90 Master: Creating new child pid 20328 at my time  0.30723930
+Master: Child pid 20312 is terminating at my time  0.30723930
+ 91 Master: Creating new child pid 20329 at my time  0.30723930
+Master: Child pid 20325 is terminating at my time  0.31795695
+ 92 Master: Creating new child pid 20330 at my time  0.31795695
+Master: Child pid 20326 is terminating at my time  0.31795695
+ 93 Master: Creating new child pid 20331 at my time  0.31795695
+Master: Child pid 20329 is terminating at my time  0.31795695
+ 94 Master: Creating new child pid 20332 at my time  0.32152950
+Master: Child pid 20328 is terminating at my time  0.32152950
+ 95 Master: Creating new child pid 20333 at my time  0.32510205
+Master: Child pid 20327 is terminating at my time  0.32510205
+ 96 Master: Creating new child pid 20334 at my time  0.32510205
+Master: Child pid 20331 is terminating at my time  0.33581970
+ 97 Master: Creating new child pid 20335 at my time  0.33581970
+Master: Child pid 20333 is terminating at my time  0.33581970
+ 98 Master: Creating new child pid 20336 at my time  0.33939225
+Master: Child pid 20334 is terminating at my time  0.33939225
+ 99 Master: Creating new child pid 20337 at my time  0.33939225
+Master: Child pid 20330 is terminating at my time  0.33939225
+100 Master: Creating new child pid 20338 at my time  0.33939225
