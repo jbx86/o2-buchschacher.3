@@ -1,7 +1,7 @@
-all: oss user
+all: oss user proj3.h
 
-oss: oss.c simclock.h
+oss: oss.c
 	gcc -o oss oss.c
 
-user: user.c simclock.h
+user: user.c
 	gcc -o user user.c

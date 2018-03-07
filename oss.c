@@ -1,4 +1,4 @@
-#include "simclock.h"
+#include "proj3.h"
 
 int main(int argc, char *argv[]) {
 
@@ -8,26 +8,25 @@ int main(int argc, char *argv[]) {
 	int x = 5;		// Maximum number of slave processes
 	char *filename = NULL;	// Log file to be used
 	int z = 20;		// Time in seconds when the master will terminat
-	FILE *fp;		// File pointer
+	FILE *fp;		// log file pointer
 
-	// Vars for shared memory
-	int shmid;		//shared memory ID
-	key_t key = KEY;	//shared memory key
-	simclock *myclock;	//pointer to shared clock
-
-	// Message queue vars
-	int msqid;
-	message_buf sbuf;
+	key_t key = KEY;	// IPC key
+	int shmid;		// shared memory ID
+	simclock *myclock;	// pointer to shared clock
+	int msqid;		// message queue ID
+	message_buf buf;	// message queue buffer
+	size_t buf_length;
 
 	int i;
 	int user_pid;
-	int user_limit = 0;
-	int user_count = 0;
-	int user_total = 0;
+	int user_limit = 0;	// Max number of 'user' processes running at a time
+	int user_count = 0;	// Number of 'user' processes currently running
+	int user_total = 0;	// Total number of 'user' processes that have run
 
 	time_t tstart = time(NULL);
 
-	//Parse command line options
+//Parse command line options:
+
 	while ((opt = getopt(argc, argv, "hs:l:t:")) != -1) {
 		switch (opt) {
 			case 'h':
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
 				x = atoi(optarg);
 				if (x < 1) {
 					fprintf(stderr, "Invalid value entered, x must be an integer greater than zero\n");
-					return 1;
+					exit(1);
 				}
 				break;
 			case 'l':
@@ -51,7 +50,7 @@ int main(int argc, char *argv[]) {
 				z = atoi(optarg);
 				if (z < 1) {
 					fprintf(stderr, "Invalid value entered, z must be an integer than zero\n");
-					return 1;
+					exit(1);
 				}
 				break;
 		}
@@ -60,76 +59,98 @@ int main(int argc, char *argv[]) {
 	// Open log file
 	if ((fp = fopen(filename, "w")) == NULL) {
 		fprintf(stderr, "Could not open log file or no log file was provided\n");
-		return 1;
+		exit(1);
 	}	
 
-	/* Create memory segment */
+// IPC Setup:
+
+	// Create memory segment
 	if ((shmid = shmget(key, sizeof(simclock), IPC_CREAT | 0666)) < 0) {
-		fprintf(stderr, "Failed to create shared memory segment\n");
-		return 1;
+		perror("oss: shmget");
+		exit(1);
 	}
 
-	/* Attach to memory segment */
+	// Attach to memory segment
 	if ((myclock = shmat(shmid, NULL, 0)) == (simclock *) -1) {
-		fprintf(stderr, "Shmat error");
-		return 1;
+		perror("oss: shmat");
+		//fprintf(stderr, "Shmat error");
+		exit(1);
 	}
 	
 	// Initialize clock at 0.0s
 	myclock->sec = 0;
 	myclock->nano = 0;
 
-
-	/* Create message queue */
+	// Create message queue
 	if ((msqid = msgget(key, IPC_CREAT | 0666)) < 0) {
-		fprintf(stderr, "Failed to create message queue\n");
-		return 1;
+		perror("oss: msgget");
+		exit(1);
 	}
 
+	// Send ready message
+	buf.mtype = 2;
+	sprintf(buf.mtext, "Ready");
+	buf_length = strlen(buf.mtext) + 1;
+	if (msgsnd(msqid, &buf, buf_length, 0) < 0) {
+		perror("oss: msgsend");
+        }
+	printf("OSS: Ready message sent\n");
 
+// Critical Section:
 
-	/* message sending code */
-	//message_buf sbuf;
-	size_t buf_length;
+	//Repeat until 100 children have been forked
+	while (user_total < 10) {
+		printf("oss: In critical section\n");
 
-	sbuf.mtype = 1;
-	strcpy(sbuf.mtext, "SPAAAAAACE");
-	buf_length = strlen(sbuf.mtext) + 1;
-
-	if (msgsnd(msqid, &sbuf, buf_length, IPC_NOWAIT) < 0) {
-		fprintf(stderr, "Failed to send message\n");
-	}
-	else {
-		fprintf(stderr, "Message: \"%s\" sent\n", sbuf.mtext);
-	}
-
-
-	// Continue until 2 seconds have passed in simulated system, 100 processes have been generated, or OSS has be running for maximum time allotted.
-	while ((myclock->sec < 2) && (user_total < 100) && (difftime(time(NULL), tstart) < z)) {
-		// Fork off the appropriate number of child processes
-		if (user_count == x) {
-			user_pid = wait(NULL);
-			fprintf(fp, "Master: Child pid %3d is terminating at my time %2d.%2d\n", user_pid, myclock->sec, myclock->nano);
-			user_count--;
+		// Fork children until limit is reached
+		while (user_count < x) {
+			printf("oss: child spawned\n");
+			user_count++;
+			user_total++;
+			if((user_pid = fork()) == 0) {
+				// Execute user process
+				execlp("./user", "user", NULL);
+			}
+			else {
+				// Write execution to log
+				fprintf(fp, "Master: Creating new (%d) child pid %d at my time %d.%09d\n", user_total,  user_pid, myclock->sec, myclock->nano);
+			}
 		}
 
-		user_count++;
-		user_total++;
+		// Wait until message recieved from child terminating
 
-		user_pid = fork();
-		if (user_pid == 0) {
-			execlp("./user", "user", NULL);
+		printf("oss: waiting for message\n");
+
+		if (msgrcv(msqid, &buf, MSGSZ, 1, 0) < 0) {
+			perror("oss: msgrcv");
+			exit(1);
 		}
 		else {
-			fprintf(fp, "%3d Master: Creating new child pid %3d at my time %2d.%2d\n", user_total, user_pid, myclock->sec, myclock->nano);
+			printf("oss: message recieved\n");
+			fprintf(fp, "Master: %s\n", buf.mtext);
+			user_count--;
+			addtime(myclock, 100);
 		}
+
+		// Send message to queue
+		buf.mtype = 2;
+		sprintf(buf.mtext, "next");
+		buf_length = strlen(buf.mtext) + 1;
+		if (msgsnd(msqid, &buf, buf_length, 0) < 0) {
+			perror("oss: msgsend");
+		}
+
+		printf("oss: message sent\n");
+
 	}
 
-	while (wait(NULL) != -1) {
-	}
+	printf("OSS: 10 processes have been run\n\n");
+
+// IPC Cleanup:
 
 	shmdt(myclock);
 	shmctl(shmid, IPC_RMID, NULL);
+	msgctl(msqid, IPC_RMID, NULL);
 
 	exit(0);
 }

@@ -1,0 +1,16 @@
+Master: Creating new (1) child pid 32214 at my time 0.000000000
+Master: Creating new (2) child pid 32215 at my time 0.000000000
+Master: Creating new (3) child pid 32216 at my time 0.000000000
+Master: Creating new (4) child pid 32217 at my time 0.000000000
+Master: Creating new (5) child pid 32218 at my time 0.000000000
+Master: Child pid 32214 is terminating at time 0.000646034 because it reached 0.000646034, which lived for 0.000646034
+Master: Creating new (6) child pid 32219 at my time 0.000646134
+Master: Child pid 32215 is terminating at time 0.001292168 because it reached 0.001292168, which lived for 0.001292168
+Master: Creating new (7) child pid 32220 at my time 0.001292268
+Master: Child pid 32218 is terminating at time 0.001938302 because it reached 0.001938302, which lived for 0.001938302
+Master: Creating new (8) child pid 32221 at my time 0.002584436
+Master: Child pid 32217 is terminating at time 0.002584436 because it reached 0.002584436, which lived for 0.002584436
+Master: Creating new (9) child pid 32222 at my time 0.003230570
+Master: Child pid 32220 is terminating at time 0.003230570 because it reached 0.003230570, which lived for 0.003230570
+Master: Creating new (10) child pid 32223 at my time 0.003230670
+Master: Child pid 32219 is terminating at time 0.003876704 because it reached 0.003876704, which lived for 0.003876704
