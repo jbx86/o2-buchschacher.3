@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 
 	key_t key = KEY;	// IPC key
 	int shmid;		// shared memory ID
-	simclock *myclock;	// pointer to shared clock
+	sim_time *shmclk;	// pointer to shared clock
 	int msqid;		// message queue ID
 	message_buf buf;	// message queue buffer
 	size_t buf_length;
@@ -65,21 +65,20 @@ int main(int argc, char *argv[]) {
 // IPC Setup:
 
 	// Create memory segment
-	if ((shmid = shmget(key, sizeof(simclock), IPC_CREAT | 0666)) < 0) {
+	if ((shmid = shmget(key, sizeof(sim_time), IPC_CREAT | 0666)) < 0) {
 		perror("oss: shmget");
 		exit(1);
 	}
 
 	// Attach to memory segment
-	if ((myclock = shmat(shmid, NULL, 0)) == (simclock *) -1) {
+	if ((shmclk = shmat(shmid, NULL, 0)) == (sim_time *) -1) {
 		perror("oss: shmat");
-		//fprintf(stderr, "Shmat error");
 		exit(1);
 	}
 	
 	// Initialize clock at 0.0s
-	myclock->sec = 0;
-	myclock->nano = 0;
+	shmclk->sec = 0;
+	shmclk->nano = 0;
 
 	// Create message queue
 	if ((msqid = msgget(key, IPC_CREAT | 0666)) < 0) {
@@ -94,16 +93,16 @@ int main(int argc, char *argv[]) {
 	if (msgsnd(msqid, &buf, buf_length, 0) < 0) {
 		perror("oss: msgsend");
         }
-	printf("OSS: Ready message sent\n");
+	printf("oss: ready message sent\n");
 
 // Critical Section:
 
 	//Repeat until 100 children have been forked
-	while (user_total < 10) {
-		printf("oss: In critical section\n");
+	while (user_total < MAXCHILD) {
+		printf("oss: in critical section\n");
 
 		// Fork children until limit is reached
-		while (user_count < x) {
+		while ((user_count < x) && (user_total < MAXCHILD)) {
 			printf("oss: child spawned\n");
 			user_count++;
 			user_total++;
@@ -113,24 +112,31 @@ int main(int argc, char *argv[]) {
 			}
 			else {
 				// Write execution to log
-				fprintf(fp, "Master: Creating new (%d) child pid %d at my time %d.%09d\n", user_total,  user_pid, myclock->sec, myclock->nano);
+				fprintf(fp, "Master: Creating new (%d) child pid %d at my time %d.%09d\n", user_total,  user_pid, shmclk->sec, shmclk->nano);
+			}
+			int i = 0;
+			while (i < 10) {
+				i++;
 			}
 		}
 
 		// Wait until message recieved from child terminating
-
 		printf("oss: waiting for message\n");
 
 		if (msgrcv(msqid, &buf, MSGSZ, 1, 0) < 0) {
 			perror("oss: msgrcv");
 			exit(1);
 		}
-		else {
-			printf("oss: message recieved\n");
-			fprintf(fp, "Master: %s\n", buf.mtext);
-			user_count--;
-			addtime(myclock, 100);
-		}
+
+//----- Critical section ---------------
+
+		// Write message to buffer, decrement current processes, and increment clock
+		printf("oss: message recieved\n");
+		fprintf(fp, "Master: %s\n", buf.mtext);
+		user_count--;
+		simadd(shmclk, 100);
+
+//--------------------------------------
 
 		// Send message to queue
 		buf.mtype = 2;
@@ -144,11 +150,11 @@ int main(int argc, char *argv[]) {
 
 	}
 
-	printf("OSS: 10 processes have been run\n\n");
+	printf("oss: 10 processes have been run\n\n");
 
 // IPC Cleanup:
 
-	shmdt(myclock);
+	shmdt(shmclk);
 	shmctl(shmid, IPC_RMID, NULL);
 	msgctl(msqid, IPC_RMID, NULL);
 
