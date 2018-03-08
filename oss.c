@@ -1,5 +1,7 @@
 #include "proj3.h"
 
+#define MAXCHILD 100
+
 int main(int argc, char *argv[]) {
 
 	// Vars for flag parsing
@@ -18,7 +20,7 @@ int main(int argc, char *argv[]) {
 	size_t buf_length;
 
 	int i;
-	int user_pid;
+	pid_t user_pid;
 	int user_limit = 0;	// Max number of 'user' processes running at a time
 	int user_count = 0;	// Number of 'user' processes currently running
 	int user_total = 0;	// Total number of 'user' processes that have run
@@ -55,6 +57,8 @@ int main(int argc, char *argv[]) {
 				break;
 		}
 	}
+
+	alarm(z);	//Set alarm to kill user after z seconds
 
 	// Open log file
 	if ((fp = fopen(filename, "w")) == NULL) {
@@ -93,52 +97,53 @@ int main(int argc, char *argv[]) {
 	if (msgsnd(msqid, &buf, buf_length, 0) < 0) {
 		perror("oss: msgsend");
         }
-	printf("oss: ready message sent\n");
 
-// Critical Section:
+	// Generate initial children
+	while ((user_count < x) && (user_total < MAXCHILD)) {
+		user_total++;
+		user_count++;
+		 if((user_pid = fork()) == 0) {
+			// Execute user process
+			execlp("./user", "user", NULL);
+		}
+		else {
+			// Write execution to log
+			fprintf(fp, "Master: Creating new (%d) child pid %ld at my time %d.%09d\n", user_total, (long)user_pid, shmclk->sec, shmclk->nano);
+			//sleep(1);
+			printf("spawn\n");
+		}
+	}
 
-	//Repeat until 100 children have been forked
-	while (user_total < MAXCHILD) {
-		printf("oss: in critical section\n");
+	//Repeat as long as there are child processes running
+	while (user_count > 0) {
+		
+		// Wait until message recieved from child terminating (type 1)
+		if (msgrcv(msqid, &buf, MSGSZ, 1, 0) < 0) {
+			perror("oss: msgrcv");
+			exit(1);
+		}
 
-		// Fork children until limit is reached
-		while ((user_count < x) && (user_total < MAXCHILD)) {
-			printf("oss: child spawned\n");
-			user_count++;
+//----- Critical section -------------------------
+
+		fprintf(fp, "Master: %s\n", buf.mtext);	// Write message to log file
+		user_count--;				// Decrement current processes
+		simadd(shmclk, 100);			// Increment clock
+
+		// Spawn more children if MAXCHILD hasn't been reached yet
+		if (user_total < MAXCHILD) {
 			user_total++;
+			user_count++;
 			if((user_pid = fork()) == 0) {
 				// Execute user process
 				execlp("./user", "user", NULL);
 			}
 			else {
 				// Write execution to log
-				fprintf(fp, "Master: Creating new (%d) child pid %d at my time %d.%09d\n", user_total,  user_pid, shmclk->sec, shmclk->nano);
-			}
-			int i = 0;
-			while (i < 10) {
-				i++;
+				fprintf(fp, "Master: Creating new (%d) child pid %ld at my time %d.%09d\n", user_total, (long)user_pid, shmclk->sec, shmclk->nano);
 			}
 		}
 
-		// Wait until message recieved from child terminating
-		printf("oss: waiting for message\n");
-
-		if (msgrcv(msqid, &buf, MSGSZ, 1, 0) < 0) {
-			perror("oss: msgrcv");
-			exit(1);
-		}
-
-//----- Critical section ---------------
-
-		// Write message to buffer, decrement current processes, and increment clock
-		printf("oss: message recieved\n");
-		fprintf(fp, "Master: %s\n", buf.mtext);
-		user_count--;
-		simadd(shmclk, 100);
-
-//--------------------------------------
-
-		// Send message to queue
+		// Signal child waiting on queue to run (type 2)
 		buf.mtype = 2;
 		sprintf(buf.mtext, "next");
 		buf_length = strlen(buf.mtext) + 1;
@@ -146,14 +151,13 @@ int main(int argc, char *argv[]) {
 			perror("oss: msgsend");
 		}
 
-		printf("oss: message sent\n");
+//------------------------------------------------
 
 	}
 
-	printf("oss: 10 processes have been run\n\n");
-
 // IPC Cleanup:
 
+	fclose(fp);
 	shmdt(shmclk);
 	shmctl(shmid, IPC_RMID, NULL);
 	msgctl(msqid, IPC_RMID, NULL);

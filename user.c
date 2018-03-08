@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 	message_buf buf;	// Message buffer
 	size_t buf_length;	// Length of send message buffer
 	int duration;		// Duration of user program
-	int increment;		//
+	int increment = 100;	//
 
 // IPC Setup:
 
@@ -35,23 +35,30 @@ int main(int argc, char *argv[]) {
 
 	// Block until message recieved
 	if (msgrcv(msqid, &buf, MSGSZ, 2, 0) < 0) {
-		perror("oss: msgrcv");
+		perror("user: msgrcv");
 		exit(1);
 	}
 
-//----- Critical Section ---------------
+//----- Critical Section -------------------------
 
-	printf("\t%ld: message recieved, entering critical section\n", getpid());
+//printf("\t%ld: message recieved, entering critical section\n", getpid());
+
+//printf("seting epoch...\n");
 
 	// Read the system clock
 	epoch = *shmclk;
+
+//printf("epoch set. \n");
 
 	// Generate random duration
 	srand(time(NULL) ^ getpid());
 	duration = (rand() % MAXDUR) + 1;
 	runtime = 0;
 
+//printf("duration(%d) and runtime(%d) initialized. \n", duration, runtime);
+
 	while (runtime < duration) {
+		//printf("%09d / %0d\n", runtime, duration);
 		// Determine how much work is being done this round
 		runtime = simdiff(*shmclk, epoch);
 		if ((duration - runtime) < increment) {
@@ -62,14 +69,14 @@ int main(int argc, char *argv[]) {
 		simadd(shmclk, increment);
 	}
 
-	printf("\t%ld: critical section finished, sending message\n", getpid());
-
-//--------------------------------------
+	//printf("\t%ld: critical section finished, sending message\n", getpid());
 
         // Write termination message to buffer
 	buf.mtype = 1;
-	sprintf(buf.mtext, "Child pid %d is terminating at time %d.%09d because it ran for  0.%09d", getpid(), shmclk->sec, shmclk->nano, runtime);
+	sprintf(buf.mtext, "Child pid %ld started at %d.%09d, is terminating at time %d.%09d because it ran for  0.%09d", (long)getpid(), epoch.sec, epoch.nano, shmclk->sec, shmclk->nano, runtime);
 	buf_length = strlen(buf.mtext) + 1;
+
+//------------------------------------------------
 
 	// Send termination message to the queue
 	if (msgsnd(msqid, &buf, buf_length, 0) < 0) {

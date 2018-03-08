@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <string.h>
+#include <signal.h>
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <sys/stat.h>
@@ -11,7 +12,6 @@
 #define KEY 1077 
 #define MSGSZ 256
 #define NPS 1000000000
-#define MAXCHILD 10
 #define MAXDUR 1000000
 
 typedef struct msgbuf{
