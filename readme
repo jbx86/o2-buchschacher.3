@@ -1,6 +1,24 @@
-Operating Systems assignment 3
+Operating Systems Assignment 3
 
-Creating an empty shell of an OS simulator and doing some tasks in preparation
-for a more comprehensive simulator later.
+Running oss will allocate shared memory, initialize a shared system clock, allocate a
+messaging queue, and execute child processes according to the arguments passed to it.
+
+These child processes are executions of user which will wait for a message, then generat
+a random duration and execute for that length of simulated system time. After running to
+completion the user process will message the oss that it is terminating.
+
+Oss will then increment simulated system time by its own
+increment then fork off another instance of user. oss will repeat this process until it
+detects that 2 minutes of real time have passed, 100 user processes have executed, or the
+simulated system clock has reached 2 seconds.
+
+Usage:
+./oss [options]
+
+Options:
+-h              Display this dialog
+-s x            Set max number of child processes running at one time to x (default 5)
+-l filename     Use filename as log file
+-t z            Set master to terminate itself after z seconds (default 20)
 
 Log at https://github.com/jbx86/o2-buchschacher.3

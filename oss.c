@@ -63,6 +63,11 @@ int main(int argc, char *argv[]) {
 				break;
 		}
 	}
+	
+	if (hflag) {
+		printf("\nUsage:\n./oss [options]\n\nOptions:\n-h\t\tDisplay this dialog\n-s x\t\tSet max number of child processes running at one time to x (default 5)\n-l filename\tUse filename as log file\n-t z\t\tSet master to terminate itself after z seconds (default 20)\n\n");
+	}
+
 	if (x > max_exec)
 		x = max_exec;
 
@@ -141,7 +146,12 @@ int main(int argc, char *argv[]) {
 
 		fprintf(fp, "Master: %s\n", buf.mtext);	// Write message to log file
 		user_count--;				// Decrement current processes
-		simadd(shmclk, 0);			// Increment clock
+		//Terminate program after 2 seconds of simulated time
+		if (shmclk->sec > 1) {
+			kill(getpid(), SIGUSR1);
+		}
+
+		simadd(shmclk, 100);			// Increment clock
 
 		// Spawn more children if MAXCHILD hasn't been reached yet
 		if (user_total < max_exec) {
