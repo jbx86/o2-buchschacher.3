@@ -2,22 +2,30 @@
 
 #define MAXCHILD 100
 
+int shmid;
+int msqid;
+//pid_t childpid[MAXCHILD];
+
+void sig_handler(int);
+
 int main(int argc, char *argv[]) {
 
 	// Vars for flag parsing
 	int opt;
 	int hflag = 0;		// -h flag
-	int x = 5;		// Maximum number of slave processes
+	int x = 5;		// Maximum number of child processes at a single time
 	char *filename = NULL;	// Log file to be used
 	int z = 20;		// Time in seconds when the master will terminat
 	FILE *fp;		// log file pointer
 
 	key_t key = KEY;	// IPC key
-	int shmid;		// shared memory ID
+	//int shmid;		// shared memory ID
 	sim_time *shmclk;	// pointer to shared clock
-	int msqid;		// message queue ID
+	//int msqid;		// message queue ID
 	message_buf buf;	// message queue buffer
 	size_t buf_length;
+
+	int max_exec = MAXCHILD;	// Max number of processes that will be forked and executed by this program
 
 	int i;
 	pid_t user_pid;
@@ -25,10 +33,7 @@ int main(int argc, char *argv[]) {
 	int user_count = 0;	// Number of 'user' processes currently running
 	int user_total = 0;	// Total number of 'user' processes that have run
 
-	time_t tstart = time(NULL);
-
-//Parse command line options:
-
+	//Parse command line options:
 	while ((opt = getopt(argc, argv, "hs:l:t:")) != -1) {
 		switch (opt) {
 			case 'h':
@@ -57,8 +62,10 @@ int main(int argc, char *argv[]) {
 				break;
 		}
 	}
+	if (x > max_exec)
+		x = max_exec;
 
-	alarm(z);	//Set alarm to kill user after z seconds
+	pid_t childpid[max_exec];	// Array of child PIDs
 
 	// Open log file
 	if ((fp = fopen(filename, "w")) == NULL) {
@@ -66,7 +73,14 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}	
 
-// IPC Setup:
+	// Signal setup
+	
+	signal(SIGALRM, sig_handler);	// Signal generated after z seconds;
+	signal(SIGUSR1, sig_handler);	// Signal generated after 100 child processes executed;
+	signal(SIGUSR2, sig_handler);	// Signal generated after 2 seconds in system time have passed;
+	alarm(z);			// Start alarm to send signal after z seconds;
+	
+	// IPC Setup:
 
 	// Create memory segment
 	if ((shmid = shmget(key, sizeof(sim_time), IPC_CREAT | 0666)) < 0) {
@@ -99,19 +113,18 @@ int main(int argc, char *argv[]) {
         }
 
 	// Generate initial children
-	while ((user_count < x) && (user_total < MAXCHILD)) {
-		user_total++;
-		user_count++;
-		 if((user_pid = fork()) == 0) {
+	while ((user_count < x) && (user_total < max_exec)) {
+		if((childpid[i] = fork()) == 0) {
 			// Execute user process
 			execlp("./user", "user", NULL);
 		}
 		else {
 			// Write execution to log
-			fprintf(fp, "Master: Creating new (%d) child pid %ld at my time %d.%09d\n", user_total, (long)user_pid, shmclk->sec, shmclk->nano);
-			//sleep(1);
-			printf("spawn\n");
+			fprintf(fp, "Master: Creating new (%d) child pid %ld at my time %d.%09d\n", user_total, (long)childpid[i], shmclk->sec, shmclk->nano);
 		}
+		i++;
+		user_total++;
+		user_count++;
 	}
 
 	//Repeat as long as there are child processes running
@@ -125,12 +138,19 @@ int main(int argc, char *argv[]) {
 
 //----- Critical section -------------------------
 
+		if (shmclk->sec >= 2) {
+			for (i = 0; i < x; i++) {
+				kill(childpid[i], SIGKILL);
+			}
+			break;
+		}
+
 		fprintf(fp, "Master: %s\n", buf.mtext);	// Write message to log file
 		user_count--;				// Decrement current processes
 		simadd(shmclk, 100);			// Increment clock
 
 		// Spawn more children if MAXCHILD hasn't been reached yet
-		if (user_total < MAXCHILD) {
+		if (user_total < max_exec) {
 			user_total++;
 			user_count++;
 			if((user_pid = fork()) == 0) {
@@ -155,12 +175,19 @@ int main(int argc, char *argv[]) {
 
 	}
 
-// IPC Cleanup:
+	// IPC Cleanup:
 
 	fclose(fp);
-	shmdt(shmclk);
 	shmctl(shmid, IPC_RMID, NULL);
 	msgctl(msqid, IPC_RMID, NULL);
 
+	exit(0);
+}
+
+void sig_handler(int sig) {
+	printf("Recieved kill signal\n");
+	//shmdt(shmclk);
+	shmctl(shmid, IPC_RMID, NULL);
+	msgctl(msqid, IPC_RMID, NULL);
 	exit(0);
 }
