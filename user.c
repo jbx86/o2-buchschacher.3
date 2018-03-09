@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
 	message_buf buf;	// Message buffer
 	size_t buf_length;	// Length of send message buffer
 	int duration;		// Duration of user program
-	int increment = 100;	//
+	int increment = 10;	//
 
 // IPC Setup:
 

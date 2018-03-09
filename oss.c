@@ -4,7 +4,8 @@
 
 int shmid;
 int msqid;
-//pid_t childpid[MAXCHILD];
+sim_time *shmclk;
+//pid_t childpid[100];
 
 void sig_handler(int);
 
@@ -20,7 +21,7 @@ int main(int argc, char *argv[]) {
 
 	key_t key = KEY;	// IPC key
 	//int shmid;		// shared memory ID
-	sim_time *shmclk;	// pointer to shared clock
+	//sim_time *shmclk;	// pointer to shared clock
 	//int msqid;		// message queue ID
 	message_buf buf;	// message queue buffer
 	size_t buf_length;
@@ -138,16 +139,9 @@ int main(int argc, char *argv[]) {
 
 //----- Critical section -------------------------
 
-		if (shmclk->sec >= 2) {
-			for (i = 0; i < x; i++) {
-				kill(childpid[i], SIGKILL);
-			}
-			break;
-		}
-
 		fprintf(fp, "Master: %s\n", buf.mtext);	// Write message to log file
 		user_count--;				// Decrement current processes
-		simadd(shmclk, 100);			// Increment clock
+		simadd(shmclk, 0);			// Increment clock
 
 		// Spawn more children if MAXCHILD hasn't been reached yet
 		if (user_total < max_exec) {
@@ -186,7 +180,7 @@ int main(int argc, char *argv[]) {
 
 void sig_handler(int sig) {
 	printf("Recieved kill signal\n");
-	//shmdt(shmclk);
+	shmdt(shmclk);
 	shmctl(shmid, IPC_RMID, NULL);
 	msgctl(msqid, IPC_RMID, NULL);
 	exit(0);
